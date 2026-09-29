@@ -56,6 +56,7 @@ void registerRider(HashTable<Rider>& riders, std::vector<std::string>& riderIds)
         std::cout << "Rider table is full.\n";
         return;
     }
+    riderIds.push_back(rider.id);
     std::cout << "Rider registered successfully.\n";
 }
 
