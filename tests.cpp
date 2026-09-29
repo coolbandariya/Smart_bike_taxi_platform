@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 #include <limits>
 #include <queue>
 #include <stdexcept>
@@ -120,6 +121,41 @@ void testPersistence() {
     check(loadedRiderIds.size() == 1 && loadedDriverIds.size() == 1,
           "restored record indexes");
 }
+
+void testMalformedLoadIsTransactional() {
+    {
+        std::ofstream out(storage::fileName(), std::ios::trunc);
+        check(static_cast<bool>(out), "create malformed persistence fixture");
+        out << "SMART_BIKE_TAXI_V1\\n"
+            << "1 0 0 0 2 1\\n"
+            << "\\"R2\\" \\"Partial Rider\\" \\"demo\\"\\n"
+            << "unexpected trailing data\\n";
+    }
+
+    HashTable<Rider> riders;
+    const Rider existing{"KEEP", "Existing", "demo"};
+    check(riders.insert(existing.id, existing), "prepare existing state");
+    std::vector<std::string> riderIds{"KEEP"}, driverIds;
+    HashTable<Driver> drivers;
+    std::queue<RideRequest> pending;
+    std::vector<Ride> history;
+    int nextRequest = 41, nextRide = 42;
+
+    const bool loaded = storage::load(riders, riderIds, drivers, driverIds,
+                                      pending, history, nextRequest, nextRide);
+    std::remove(storage::fileName());
+    std::remove((std::string(storage::fileName()) + ".tmp").c_str());
+    std::remove((std::string(storage::fileName()) + ".bak").c_str());
+
+    check(!loaded, "malformed persistence file rejected");
+    check(riders.size() == 1 && riders.find("KEEP") != nullptr,
+          "failed load preserves existing records");
+    check(riders.find("R2") == nullptr, "failed load does not leak partial records");
+    check(riderIds.size() == 1 && riderIds.front() == "KEEP",
+          "failed load preserves record indexes");
+    check(nextRequest == 41 && nextRide == 42,
+          "failed load preserves ID counters");
+}
 }  // namespace
 
 int main() {
@@ -127,6 +163,7 @@ int main() {
         testGraph();
         testHashTable();
         testPersistence();
+        testMalformedLoadIsTransactional();
         std::cout << "All tests passed.\n";
         return 0;
     } catch (const std::exception& error) {
