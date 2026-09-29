@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include <limits>
 #include <iostream>
 
 #include "graph/Graph.h"
@@ -24,6 +25,9 @@ int main() {
     assert(!graph.shortestPath("A", "missing").reachable);
     assert(!graph.addRoad("A", "missing", 1.0));
     assert(!graph.addRoad("A", "C", -1.0));
+    assert(!graph.addRoad("A", "C", std::numeric_limits<double>::infinity()));
+    assert(!graph.addRoad("A", "C", std::numeric_limits<double>::quiet_NaN()));
+    assert(graph.addRoad("A", "A", 0.0));
 
     HashTable<Rider> riders(5);
     Rider rider{"R1", "Test Rider", "0000000000"};
@@ -32,6 +36,11 @@ int main() {
     assert(riders.find("R1") != nullptr);
     assert(riders.find("R1")->name == "Test Rider");
     assert(riders.find("missing") == nullptr);
+    assert(!riders.insert("", rider));
+
+    HashTable<Rider> tiny(1);
+    assert(tiny.insert("only", rider));
+    assert(!tiny.insert("second", updated));
 
     Rider updated{"R1", "Updated Rider", "1111111111"};
     assert(riders.insert(updated.id, updated));
