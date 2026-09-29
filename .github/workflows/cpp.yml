@@ -6,17 +6,44 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
+    name: Build and test (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: g++
+            package: g++
+          - compiler: clang++
+            package: clang
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install compiler and CMake
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.package }} cmake
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=Debug
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+  sanitizers:
+    name: Address and undefined behavior sanitizers
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Set up C++ compiler
-        run: sudo apt-get update && sudo apt-get install -y g++
-      - name: Build application
-        run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror main.cpp -o smart_bike_taxi
-      - name: Build tests
-        run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror tests.cpp -o tests
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Werror"
+      - name: Build
+        run: cmake --build build --parallel
       - name: Run tests
-        run: ./tests
+        run: ctest --test-dir build --output-on-failure
