@@ -14,7 +14,7 @@ target_include_directories(smart_bike_taxi_tests PRIVATE ${CMAKE_CURRENT_SOURCE_
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     foreach(target smart_bike_taxi smart_bike_taxi_tests)
-        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
     endforeach()
 endif()
 
