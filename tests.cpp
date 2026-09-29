@@ -6,6 +6,10 @@
 #include "graph/Graph.h"
 #include "models/Models.h"
 #include "structures/HashTable.h"
+#include "storage/Storage.h"
+#include <cstdio>
+#include <queue>
+#include <vector>
 
 int main() {
     Graph graph;
@@ -38,11 +42,11 @@ int main() {
     assert(riders.find("missing") == nullptr);
     assert(!riders.insert("", rider));
 
+    Rider updated{"R1", "Updated Rider", "1111111111"};
     HashTable<Rider> tiny(1);
     assert(tiny.insert("only", rider));
     assert(!tiny.insert("second", updated));
 
-    Rider updated{"R1", "Updated Rider", "1111111111"};
     assert(riders.insert(updated.id, updated));
     assert(riders.size() == 1);
     assert(riders.find("R1")->name == "Updated Rider");
