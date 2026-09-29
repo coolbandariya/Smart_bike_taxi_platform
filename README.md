@@ -151,7 +151,7 @@ g++ -std=c++17 -Wall -Wextra -Wpedantic tests.cpp -o tests
 ./tests
 ```
 
-Tests cover graph and hash-table behavior, invalid road weights, and a persistence save/load round trip. GitHub Actions builds with GCC and Clang and runs the tests; a separate job enables AddressSanitizer and UndefinedBehaviorSanitizer. Run locally with `cmake -S . -B build`, `cmake --build build --parallel`, then `ctest --test-dir build --output-on-failure`.
+Tests cover graph and hash-table behavior, invalid road weights, a persistence save/load round trip, and rejection of malformed persistence without partially mutating existing in-memory state. GitHub Actions builds with GCC and Clang and runs the tests; a separate job enables AddressSanitizer and UndefinedBehaviorSanitizer. Run locally with `cmake -S . -B build`, `cmake --build build --parallel`, then `ctest --test-dir build --output-on-failure`.
 
 ## Local data
 
@@ -178,7 +178,7 @@ Fare estimate = ₹20 + (shortest trip distance in km × ₹10). This is a demon
 
 ## Further development
 
-Possible extensions include a configurable map, larger/resizing hash table, stronger persistence strategy, additional dispatch/cancellation integration tests, and a real backend. Production use would also require authentication, privacy controls, secure storage, operational monitoring, and real service integrations.
+Possible extensions include a configurable map, a larger/resizing hash table, dispatch/cancellation integration tests, a ride lifecycle with explicit requested/assigned/in-progress/completed/cancelled states, and a real backend. Production use would also require authentication, privacy controls, secure storage, operational monitoring, and real service integrations.
 
 ---
 
