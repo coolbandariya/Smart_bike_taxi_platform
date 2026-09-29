@@ -52,7 +52,8 @@ inline DispatchResult dispatchNext(
     const RideRequest request = requests.front();
     const Rider* rider = riders.find(request.riderId);
     const auto trip = city.shortestPath(request.pickup, request.destination);
-    if (!rider || !trip.reachable || request.requestId <= 0 || nextRideId <= 0) {
+    if (!rider || !trip.reachable || request.pickup == request.destination ||
+        request.requestId <= 0 || nextRideId <= 0) {
         return {DispatchStatus::InvalidRequest, {}, "Request has invalid rider, route, or ID."};
     }
 
