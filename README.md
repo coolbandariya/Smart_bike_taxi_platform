@@ -179,3 +179,12 @@ This repository is an **academic simulation**, not a production ride-hailing ser
 <div align="center">
 Built as a C++17 DSA academic project.
 </div>
+
+
+## Recent improvements
+
+- Added a console menu option to manually toggle a driver's availability.
+- Hardened road creation to reject infinite and NaN distances.
+- Expanded tests for invalid road weights, zero-distance roads, empty hash keys, and full hash tables.
+
+Persistence is still a future improvement; all records currently exist only for the current program session.
