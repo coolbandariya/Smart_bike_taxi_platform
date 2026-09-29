@@ -127,11 +127,11 @@ void testMalformedLoadIsTransactional() {
     {
         std::ofstream out(storage::fileName(), std::ios::trunc);
         check(static_cast<bool>(out), "create malformed persistence fixture");
-        out << "SMART_BIKE_TAXI_V1\\n"
-            << "1 0 0 0 2 1\\n"
+        out << "SMART_BIKE_TAXI_V1\n"
+            << "1 0 0 0 2 1\n"
             << std::quoted("R2") << ' ' << std::quoted("Partial Rider")
-            << ' ' << std::quoted("demo") << '\\n'
-            << "unexpected trailing data\\n";
+            << ' ' << std::quoted("demo") << '\n'
+            << "unexpected trailing data\n";
     }
 
     HashTable<Rider> riders;
