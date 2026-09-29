@@ -1,18 +1,20 @@
 # Smart Bike Taxi Platform
 
-A console-based C++17 DSA project based on the submitted project synopsis.
+A console-based C++17 DSA project. It is an academic simulation using a small illustrative Noida road map.
 
-## Current milestone
+## Implemented features
 
-- City modeled as an undirected weighted graph using an adjacency list.
-- Dijkstra's algorithm computes a shortest route and distance.
-- A starter fare estimate is calculated as `Rs. 20 + Rs. 10 × distance_km`.
-- The city map and fare rates are sample values for demonstration, not live data.
+- **Weighted graph + Dijkstra:** finds the shortest route between known locations.
+- **Rider and driver registration:** stores records in custom hash tables during the program session.
+- **FIFO ride queue:** ride requests are processed in arrival order.
+- **Min-heap driver matching:** selects the available driver with the shortest route to the pickup.
+- **Fare estimate:** sample formula `Rs. 20 + Rs. 10 × distance_km`.
+- **Ride history:** records simulated completed rides for the current session.
 
 ## Build and run
 
 ### Windows (MinGW g++)
-Open PowerShell in this folder:
+Open PowerShell in the project folder:
 
 ```powershell
 g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o smart_bike_taxi.exe
@@ -20,26 +22,56 @@ g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o smart_bike_taxi.exe
 ```
 
 ### Linux / macOS
+
 ```bash
 g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o smart_bike_taxi
 ./smart_bike_taxi
 ```
 
-Enter a location exactly as it appears in the displayed list.
+Enter location names exactly as shown by the application.
 
-## Planned modules
+## Run tests
 
-1. Rider, Driver, and Ride models
-2. Custom hash table for rider/driver lookup
-3. Ride request FIFO queue
-4. Min-heap for driver selection
-5. Booking workflow and ride history
-6. Module tests and final documentation
+The tests cover shortest-path behavior and the custom hash table.
 
-## DSA notes
+### Windows
 
-Dijkstra's algorithm is used because road weights are non-negative. With the priority queue used here, the typical time complexity is `O((V + E) log V)` for a sparse graph. The graph stores each two-way road in both directions.
+```powershell
+g++ -std=c++17 -Wall -Wextra -pedantic tests.cpp -o tests.exe
+.\tests.exe
+```
 
-## Limitations
+### Linux / macOS
 
-This is an academic simulation. It does not use GPS, a map service, a database, a payment provider, or a real driver network.
+```bash
+g++ -std=c++17 -Wall -Wextra -pedantic tests.cpp -o tests
+./tests
+```
+
+## Project structure
+
+- `main.cpp` — interactive menu and booking workflow
+- `graph/Graph.h` — adjacency-list graph and Dijkstra implementation
+- `models/Models.h` — rider, driver, request, and ride data models
+- `structures/HashTable.h` — custom open-addressing hash table
+- `tests.cpp` — basic assertions for graph and hash table
+
+## DSA overview
+
+| Component | Data structure / algorithm | Purpose |
+|---|---|---|
+| City map | Adjacency list | Stores roads and distances |
+| Route finding | Dijkstra + min-priority queue | Finds shortest distance |
+| Rider/driver lookup | Linear-probing hash table | Average-case constant-time lookup |
+| Pending requests | FIFO queue | Preserves request order |
+| Driver matching | Min-heap | Chooses the closest available driver |
+
+For a sparse graph, Dijkstra with a binary heap typically runs in `O((V + E) log V)` time.
+
+## Current limitations
+
+- The map and road distances are sample data, not live map data.
+- Rider and driver records exist only in memory and disappear when the program exits.
+- Phone numbers are demonstration inputs; no OTP or identity verification is performed.
+- A dispatched ride is marked completed immediately to demonstrate the workflow.
+- There is no GPS, live driver network, payment integration, or persistent database.
