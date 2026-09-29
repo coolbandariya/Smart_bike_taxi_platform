@@ -95,8 +95,8 @@ void requestRide(const HashTable<Rider>& riders, const Graph& city,
     request.pickup = readLine("Pickup location: ");
     request.destination = readLine("Destination: ");
     const auto route = city.shortestPath(request.pickup, request.destination);
-    if (!route.reachable) {
-        std::cout << "Invalid location or no route available.\n";
+    if (!route.reachable || request.pickup == request.destination) {
+        std::cout << "Invalid location, identical pickup and destination, or no route available.\n";
         return;
     }
     request.requestId = nextRequestId++;
