@@ -131,6 +131,8 @@ g++ -std=c++17 -Wall -Wextra -Wpedantic main.cpp -o smart_bike_taxi
 | 8 | Cancel a pending request |
 | 9 | Show drivers |
 | 10 | Toggle driver availability |
+| 11 | Start an assigned ride |
+| 12 | Complete an in-progress ride |
 | 0 | Exit |
 
 Enter location names exactly as listed by **Show locations**.
