@@ -1,0 +1,22 @@
+name: C++ build and tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up C++ compiler
+        run: sudo apt-get update && sudo apt-get install -y g++
+      - name: Build application
+        run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror main.cpp -o smart_bike_taxi
+      - name: Build tests
+        run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror tests.cpp -o tests
+      - name: Run tests
+        run: ./tests
