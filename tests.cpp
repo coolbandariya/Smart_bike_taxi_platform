@@ -129,7 +129,8 @@ void testMalformedLoadIsTransactional() {
         check(static_cast<bool>(out), "create malformed persistence fixture");
         out << "SMART_BIKE_TAXI_V1\\n"
             << "1 0 0 0 2 1\\n"
-            << "\\"R2\\" \\"Partial Rider\\" \\"demo\\"\\n"
+            << std::quoted("R2") << ' ' << std::quoted("Partial Rider")
+            << ' ' << std::quoted("demo") << '\\n'
             << "unexpected trailing data\\n";
     }
 
