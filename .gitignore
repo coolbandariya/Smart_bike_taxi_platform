@@ -1,0 +1,6 @@
+# Build outputs
+*.exe
+smart_bike_taxi
+*.o
+*.out
+.vscode/
