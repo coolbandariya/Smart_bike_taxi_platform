@@ -175,7 +175,7 @@ void dispatchNext(const HashTable<Rider>& riders, HashTable<Driver>& drivers,
 
 void cancelRequest(std::queue<RideRequest>& requests) {
     if (requests.empty()) {
-        std::cout << "No pending requests to cancel.\\n";
+        std::cout << "No pending requests to cancel.\n";
         return;
     }
     const std::string raw = readLine("Request ID to cancel: ");
@@ -199,13 +199,13 @@ void cancelRequest(std::queue<RideRequest>& requests) {
         }
     }
     requests.swap(retained);
-    std::cout << (removed ? "Request cancelled.\\n" : "Request ID not found.\\n");
+    std::cout << (removed ? "Request cancelled.\n" : "Request ID not found.\n");
 }
 
 void showDrivers(const HashTable<Driver>& drivers,
                  const std::vector<std::string>& driverIds) {
     if (driverIds.empty()) {
-        std::cout << "No drivers registered.\\n";
+        std::cout << "No drivers registered.\n";
         return;
     }
     for (const auto& id : driverIds) {
@@ -213,7 +213,7 @@ void showDrivers(const HashTable<Driver>& drivers,
         if (driver) {
             std::cout << id << " | " << driver->name << " | "
                       << driver->location << " | "
-                      << (driver->available ? "Available" : "Busy") << '\\n';
+                      << (driver->available ? "Available" : "Busy") << '\n';
         }
     }
 }
