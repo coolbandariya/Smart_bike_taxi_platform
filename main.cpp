@@ -178,20 +178,31 @@ void showDrivers(const HashTable<Driver>& drivers,
 }
 
 void toggleDriverAvailability(HashTable<Driver>& drivers,
-                                const std::vector<std::string>& driverIds) {
+                                const std::vector<std::string>& driverIds,
+                                const std::vector<Ride>& history) {
     if (driverIds.empty()) {
-        std::cout << "No drivers registered.\n";
+        std::cout << "No drivers registered.\\n";
         return;
     }
     const std::string id = readLine("Driver ID: ");
     Driver* driver = drivers.find(id);
     if (!driver) {
-        std::cout << "Driver not found.\n";
+        std::cout << "Driver not found.\\n";
         return;
+    }
+    if (!driver->available) {
+        for (const Ride& ride : history) {
+            if (ride.driverId == driver->id &&
+                (ride.status == ride_service::statusName(ride_service::RideStatus::Assigned) ||
+                 ride.status == ride_service::statusName(ride_service::RideStatus::InProgress))) {
+                std::cout << "Driver has an active ride and cannot be made available manually.\\n";
+                return;
+            }
+        }
     }
     driver->available = !driver->available;
     std::cout << "Driver is now "
-              << (driver->available ? "Available" : "Unavailable") << ".\n";
+              << (driver->available ? "Available" : "Unavailable") << ".\\n";
 }
 
 int readRideId(const std::string& prompt) {
@@ -293,7 +304,7 @@ int main() {
             case 7: std::cout << "Pending requests: " << requests.size() << "\n"; break;
             case 8: cancelRequest(requests); break;
             case 9: showDrivers(drivers, driverIds); break;
-            case 10: toggleDriverAvailability(drivers, driverIds); break;
+            case 10: toggleDriverAvailability(drivers, driverIds, history); break;
             case 11: startRide(history); break;
             case 12: completeRide(history, drivers); break;
             case 0: running = false; break;
