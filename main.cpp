@@ -9,10 +9,9 @@
 #include "models/Models.h"
 #include "structures/HashTable.h"
 #include "storage/Storage.h"
+#include "services/RideService.h"
 
 namespace {
-constexpr double BASE_FARE = 20.0;
-constexpr double FARE_PER_KM = 10.0;
 
 std::string readLine(const std::string& prompt) {
     std::cout << prompt;
@@ -113,62 +112,18 @@ void dispatchNext(const HashTable<Rider>& riders, HashTable<Driver>& drivers,
                   const std::vector<std::string>& driverIds, const Graph& city,
                   std::queue<RideRequest>& requests, std::vector<Ride>& history,
                   int& nextRideId) {
-    if (requests.empty()) {
-        std::cout << "No pending ride requests.\n";
+    const auto result = ride_service::dispatchNext(
+        riders, drivers, driverIds, city, requests, history, nextRideId);
+    if (result.status != ride_service::DispatchStatus::Dispatched) {
+        std::cout << result.message << '\n';
         return;
     }
 
-    const RideRequest request = requests.front();
-    requests.pop();
-
-    using Candidate = std::pair<double, std::string>;
-    std::priority_queue<Candidate, std::vector<Candidate>,
-                        std::greater<Candidate>> nearestDrivers;
-
-    for (const auto& driverId : driverIds) {
-        const Driver* driver = drivers.find(driverId);
-        if (!driver || !driver->available) continue;
-        const auto routeToPickup = city.shortestPath(driver->location, request.pickup);
-        if (routeToPickup.reachable) {
-            nearestDrivers.push({routeToPickup.distance, driverId});
-        }
-    }
-
-    if (nearestDrivers.empty()) {
-        requests.push(request);
-        std::cout << "No available driver. Request #" << request.requestId
-                  << " remains queued.\n";
-        return;
-    }
-
-    const std::string driverId = nearestDrivers.top().second;
-    Driver* driver = drivers.find(driverId);
-    const auto trip = city.shortestPath(request.pickup, request.destination);
-    if (!driver || !trip.reachable) {
-        requests.push(request);
-        std::cout << "Could not dispatch this request; it was requeued.\n";
-        return;
-    }
-
-    driver->available = false;
-    Ride ride;
-    ride.rideId = nextRideId++;
-    ride.riderId = request.riderId;
-    ride.driverId = driverId;
-    ride.pickup = request.pickup;
-    ride.destination = request.destination;
-    ride.distanceKm = trip.distance;
-    ride.fare = BASE_FARE + trip.distance * FARE_PER_KM;
-    ride.route = trip.path;
-    ride.status = "Completed (simulated)";
-
-    // The console simulation completes the trip immediately.
-    driver->location = request.destination;
-    driver->available = true;
-    history.push_back(ride);
-
-    std::cout << "\nRide #" << ride.rideId << " dispatched and completed (simulation).\n";
-    std::cout << "Rider: " << riders.find(request.riderId)->name
+    const Ride& ride = result.ride;
+    const Driver* driver = drivers.find(ride.driverId);
+    const Rider* rider = riders.find(ride.riderId);
+    std::cout << '\n' << result.message << " #" << ride.rideId << '\n';
+    std::cout << "Rider: " << rider->name
               << " | Driver: " << driver->name << " (" << driver->id << ")\n";
     std::cout << "Route: ";
     printRoute(ride.route);
