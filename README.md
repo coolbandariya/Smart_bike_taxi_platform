@@ -74,7 +74,8 @@ V = locations, E = roads, D = eligible drivers. Hash table performance depends o
 
 ```text
 .
-├── .github/workflows/cpp.yml  # CI build and test
+├── .github/workflows/cpp.yml  # GCC, Clang, and sanitizer CI
+├── CMakeLists.txt             # Portable build and CTest configuration
 ├── graph/Graph.h              # Graph and Dijkstra
 ├── models/Models.h            # Rider, driver, request, ride models
 ├── storage/Storage.h          # Versioned local save/load
@@ -91,16 +92,25 @@ V = locations, E = roads, D = eligible drivers. Hash table performance depends o
 
 ## Build and run
 
-Run from the repository root.
+Run from the repository root. CMake is the recommended cross-platform build path.
 
-**Windows (MinGW / PowerShell)**
+**CMake (Windows, Linux, macOS)**
+
+```bash
+cmake -S . -B build
+cmake --build build --parallel
+```
+
+Run the generated `smart_bike_taxi` (or `smart_bike_taxi.exe` on Windows) from the build directory. The application stores its data in the current working directory.
+
+**Windows (MinGW / PowerShell, direct compiler)**
 
 ```powershell
 g++ -std=c++17 -Wall -Wextra -Wpedantic main.cpp -o smart_bike_taxi.exe
 .\smart_bike_taxi.exe
 ```
 
-**Linux / macOS**
+**Linux / macOS (direct compiler)**
 
 ```bash
 g++ -std=c++17 -Wall -Wextra -Wpedantic main.cpp -o smart_bike_taxi
@@ -141,7 +151,7 @@ g++ -std=c++17 -Wall -Wextra -Wpedantic tests.cpp -o tests
 ./tests
 ```
 
-Tests cover graph and hash-table behavior, invalid road weights, and a persistence save/load round trip. GitHub Actions runs strict compilation and the test executable on pushes and pull requests targeting `main`.
+Tests cover graph and hash-table behavior, invalid road weights, and a persistence save/load round trip. GitHub Actions builds with GCC and Clang and runs the tests; a separate job enables AddressSanitizer and UndefinedBehaviorSanitizer. Run locally with `cmake -S . -B build`, `cmake --build build --parallel`, then `ctest --test-dir build --output-on-failure`.
 
 ## Local data
 
