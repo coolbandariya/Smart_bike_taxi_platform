@@ -125,6 +125,7 @@ void dispatchNext(const HashTable<Rider>& riders, HashTable<Driver>& drivers,
     std::cout << '\n' << result.message << " #" << ride.rideId << '\n';
     std::cout << "Rider: " << rider->name
               << " | Driver: " << driver->name << " (" << driver->id << ")\n";
+    std::cout << "Status: " << ride.status << "\n";
     std::cout << "Route: ";
     printRoute(ride.route);
     std::cout << "\nDistance: " << std::fixed << std::setprecision(2)
@@ -193,6 +194,28 @@ void toggleDriverAvailability(HashTable<Driver>& drivers,
               << (driver->available ? "Available" : "Unavailable") << ".\n";
 }
 
+int readRideId(const std::string& prompt) {
+    const std::string raw = readLine(prompt);
+    try {
+        std::size_t used = 0;
+        const int id = std::stoi(raw, &used);
+        return used == raw.size() && id > 0 ? id : -1;
+    } catch (...) { return -1; }
+}
+
+void startRide(std::vector<Ride>& history) {
+    const int id = readRideId("Assigned ride ID to start: ");
+    std::cout << (ride_service::startRide(history, id)
+        ? "Ride is now in progress.\\n" : "Ride not found or not in assigned state.\\n");
+}
+
+void completeRide(std::vector<Ride>& history, HashTable<Driver>& drivers) {
+    const int id = readRideId("In-progress ride ID to complete: ");
+    std::cout << (ride_service::completeRide(history, drivers, id)
+        ? "Ride completed; driver is available at the destination.\\n"
+        : "Ride not found, not in progress, or driver state is invalid.\\n");
+}
+
 void showHistory(const std::vector<Ride>& history) {
     if (history.empty()) {
         std::cout << "No completed rides yet.\n";
@@ -256,6 +279,8 @@ int main() {
                   << "8. Cancel a pending request\n"
                   << "9. Show drivers\n"
                   << "10. Toggle driver availability\n"
+                  << "11. Start an assigned ride\n"
+                  << "12. Complete an in-progress ride\n"
                   << "0. Exit\n";
         switch (readChoice()) {
             case 1: city.printLocations(); break;
@@ -269,6 +294,8 @@ int main() {
             case 8: cancelRequest(requests); break;
             case 9: showDrivers(drivers, driverIds); break;
             case 10: toggleDriverAvailability(drivers, driverIds); break;
+            case 11: startRide(history); break;
+            case 12: completeRide(history, drivers); break;
             case 0: running = false; break;
             default: std::cout << "Invalid choice. Enter a number from the menu.\n";
         }
