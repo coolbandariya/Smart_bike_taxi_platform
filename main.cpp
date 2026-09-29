@@ -272,6 +272,8 @@ int main() {
                   << "5. Dispatch next request\n"
                   << "6. Show ride history\n"
                   << "7. Show pending request count\n"
+                  << "8. Cancel a pending request\n"
+                  << "9. Show drivers\n"
                   << "0. Exit\n";
         switch (readChoice()) {
             case 1: city.printLocations(); break;
@@ -282,6 +284,8 @@ int main() {
                                  requests, history, nextRideId); break;
             case 6: showHistory(history); break;
             case 7: std::cout << "Pending requests: " << requests.size() << "\n"; break;
+            case 8: cancelRequest(requests); break;
+            case 9: showDrivers(drivers, driverIds); break;
             case 0: running = false; break;
             default: std::cout << "Invalid choice. Enter a number from the menu.\n";
         }
