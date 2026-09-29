@@ -1,6 +1,7 @@
 #ifndef SMART_BIKE_TAXI_STORAGE_H
 #define SMART_BIKE_TAXI_STORAGE_H
 
+#include <cstdio>
 #include <fstream>
 #include <iomanip>
 #include <queue>
