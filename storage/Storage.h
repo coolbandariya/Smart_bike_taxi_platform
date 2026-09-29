@@ -2,6 +2,7 @@
 #define SMART_BIKE_TAXI_STORAGE_H
 
 #include <cstdio>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <queue>
@@ -124,7 +125,8 @@ inline bool load(HashTable<Rider>& riders, std::vector<std::string>& riderIds,
         RideRequest r;
         if (!(in >> r.requestId >> std::quoted(r.riderId) >> std::quoted(r.pickup)
                  >> std::quoted(r.destination)) || r.requestId < 1 ||
-            !riders.find(r.riderId)) return false;
+            r.riderId.empty() || r.pickup.empty() || r.destination.empty() ||
+            r.pickup == r.destination || !riders.find(r.riderId)) return false;
         pending.push(r);
     }
     for (std::size_t i = 0; i < nh; ++i) {
@@ -133,16 +135,23 @@ inline bool load(HashTable<Rider>& riders, std::vector<std::string>& riderIds,
         if (!(in >> r.rideId >> std::quoted(r.riderId) >> std::quoted(r.driverId)
                  >> std::quoted(r.pickup) >> std::quoted(r.destination)
                  >> r.distanceKm >> r.fare >> std::quoted(r.status) >> routeSize) ||
-            r.rideId < 1 || routeSize > 1000 || !riders.find(r.riderId) ||
-            !drivers.find(r.driverId)) return false;
+            r.rideId < 1 || routeSize == 0 || routeSize > 1000 ||
+            r.riderId.empty() || r.driverId.empty() || r.pickup.empty() ||
+            r.destination.empty() || r.pickup == r.destination ||
+            !std::isfinite(r.distanceKm) || r.distanceKm <= 0.0 ||
+            !std::isfinite(r.fare) || r.fare < 0.0 || r.status.empty() ||
+            !riders.find(r.riderId) || !drivers.find(r.driverId)) return false;
         for (std::size_t j = 0; j < routeSize; ++j) {
             std::string stop;
-            if (!(in >> std::quoted(stop))) return false;
+            if (!(in >> std::quoted(stop)) || stop.empty()) return false;
             r.route.push_back(stop);
         }
+        if (r.route.front() != r.pickup || r.route.back() != r.destination)
+            return false;
         history.push_back(r);
     }
-    return true;
+    in >> std::ws;
+    return in.eof();
 }
 } // namespace storage
 #endif
