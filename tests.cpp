@@ -12,6 +12,7 @@
 #include "models/Models.h"
 #include "storage/Storage.h"
 #include "structures/HashTable.h"
+#include "services/RideService.h"
 
 namespace {
 void check(bool condition, const std::string& message) {
@@ -156,6 +157,73 @@ void testMalformedLoadIsTransactional() {
     check(nextRequest == 41 && nextRide == 42,
           "failed load preserves ID counters");
 }
+void testRideDispatchService() {
+    Graph city;
+    check(city.addLocation("A") && city.addLocation("B") &&
+              city.addLocation("C") && city.addLocation("D"),
+          "create dispatch locations");
+    check(city.addRoad("A", "B", 2.0) && city.addRoad("B", "C", 3.0) &&
+              city.addRoad("D", "A", 1.0),
+          "create dispatch roads");
+
+    HashTable<Rider> riders;
+    check(riders.insert("R1", Rider{"R1", "Rider One", "demo"}),
+          "register dispatch rider");
+    HashTable<Driver> drivers;
+    check(drivers.insert("FAR", Driver{"FAR", "Far Driver", "demo", "C", true}),
+          "register far driver");
+    check(drivers.insert("NEAR", Driver{"NEAR", "Near Driver", "demo", "A", true}),
+          "register near driver");
+    std::vector<std::string> driverIds{"FAR", "NEAR"};
+    std::queue<RideRequest> requests;
+    requests.push(RideRequest{1, "R1", "A", "C"});
+    std::vector<Ride> history;
+    int nextRideId = 10;
+
+    const auto result = ride_service::dispatchNext(
+        riders, drivers, driverIds, city, requests, history, nextRideId);
+    check(result.status == ride_service::DispatchStatus::Dispatched,
+          "dispatch succeeds");
+    check(result.ride.driverId == "NEAR", "nearest available driver selected");
+    check(result.ride.distanceKm == 5.0, "trip distance recorded");
+    check(result.ride.fare == 70.0, "fare calculated from trip distance");
+    check(result.ride.status == "Completed (simulated)", "simulation status recorded");
+    check(requests.empty() && history.size() == 1, "request consumed and ride recorded");
+    check(nextRideId == 11, "ride ID increments after dispatch");
+    check(drivers.find("NEAR")->location == "C" &&
+              drivers.find("NEAR")->available,
+          "driver ends at destination and is available");
+    check(drivers.find("FAR")->location == "C", "unselected driver unchanged");
+
+    HashTable<Driver> unavailableDrivers;
+    check(unavailableDrivers.insert(
+              "BUSY", Driver{"BUSY", "Busy Driver", "demo", "A", false}),
+          "register busy driver");
+    std::vector<std::string> busyIds{"BUSY"};
+    std::queue<RideRequest> retained;
+    retained.push(RideRequest{2, "R1", "A", "B"});
+    std::vector<Ride> noHistory;
+    int unchangedRideId = 20;
+    const auto noDriver = ride_service::dispatchNext(
+        riders, unavailableDrivers, busyIds, city, retained, noHistory,
+        unchangedRideId);
+    check(noDriver.status == ride_service::DispatchStatus::NoAvailableDriver,
+          "busy drivers cannot be dispatched");
+    check(retained.size() == 1 && retained.front().requestId == 2,
+          "request retained when no driver is available");
+    check(noHistory.empty() && unchangedRideId == 20,
+          "failed dispatch does not create ride or consume ID");
+
+    std::queue<RideRequest> invalid;
+    invalid.push(RideRequest{3, "MISSING", "A", "B"});
+    const auto badRequest = ride_service::dispatchNext(
+        riders, drivers, driverIds, city, invalid, history, nextRideId);
+    check(badRequest.status == ride_service::DispatchStatus::InvalidRequest,
+          "unknown rider request rejected");
+    check(invalid.size() == 1 && nextRideId == 11,
+          "invalid request remains queued without consuming ID");
+}
+
 }  // namespace
 
 int main() {
@@ -164,6 +232,7 @@ int main() {
         testHashTable();
         testPersistence();
         testMalformedLoadIsTransactional();
+        testRideDispatchService();
         std::cout << "All tests passed.\n";
         return 0;
     } catch (const std::exception& error) {
