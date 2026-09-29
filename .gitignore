@@ -4,3 +4,7 @@ smart_bike_taxi
 *.o
 *.out
 .vscode/
+
+# Local application data (contains demo personal fields)
+smart_bike_taxi_data.txt
+smart_bike_taxi_data.txt.tmp
