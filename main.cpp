@@ -224,18 +224,18 @@ void showDrivers(const HashTable<Driver>& drivers,
 void toggleDriverAvailability(HashTable<Driver>& drivers,
                                 const std::vector<std::string>& driverIds) {
     if (driverIds.empty()) {
-        std::cout << "No drivers registered.\\n";
+        std::cout << "No drivers registered.\n";
         return;
     }
     const std::string id = readLine("Driver ID: ");
     Driver* driver = drivers.find(id);
     if (!driver) {
-        std::cout << "Driver not found.\\n";
+        std::cout << "Driver not found.\n";
         return;
     }
     driver->available = !driver->available;
     std::cout << "Driver is now "
-              << (driver->available ? "Available" : "Unavailable") << ".\\n";
+              << (driver->available ? "Available" : "Unavailable") << ".\n";
 }
 
 void showHistory(const std::vector<Ride>& history) {
