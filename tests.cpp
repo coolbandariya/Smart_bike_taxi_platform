@@ -89,7 +89,7 @@ void testPersistence() {
     ride.distanceKm = 7.0;
     ride.fare = 90.0;
     ride.route = {"A", "B", "C"};
-    ride.status = "Completed (simulated)";
+    ride.status = "Completed";
     const std::vector<Ride> history{ride};
 
     check(storage::save(savedRiders, riderIds, savedDrivers, driverIds,
@@ -235,6 +235,15 @@ void testRideDispatchService() {
           "unknown rider request rejected");
     check(invalid.size() == 1 && nextRideId == 11,
           "invalid request remains queued without consuming ID");
+
+    std::queue<RideRequest> zeroLength;
+    zeroLength.push(RideRequest{4, "R1", "A", "A"});
+    const auto sameLocation = ride_service::dispatchNext(
+        riders, drivers, driverIds, city, zeroLength, history, nextRideId);
+    check(sameLocation.status == ride_service::DispatchStatus::InvalidRequest,
+          "identical pickup and destination rejected");
+    check(zeroLength.size() == 1 && nextRideId == 11,
+          "zero-length request remains queued without consuming ride ID");
 }
 
 }  // namespace
