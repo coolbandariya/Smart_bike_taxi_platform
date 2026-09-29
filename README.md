@@ -10,6 +10,8 @@ A console-based C++17 DSA project. It is an academic simulation using a small il
 - **Min-heap driver matching:** selects the available driver with the shortest route to the pickup.
 - **Fare estimate:** sample formula `Rs. 20 + Rs. 10 × distance_km`.
 - **Ride history:** records simulated completed rides for the current session.
+- **Request cancellation:** removes a selected request from the pending queue.
+- **Driver listing:** displays registered drivers, locations, and availability.
 
 ## Build and run
 
