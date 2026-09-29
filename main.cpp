@@ -1,4 +1,5 @@
 #include <iomanip>
+#include <limits>
 #include <iostream>
 #include <queue>
 #include <string>
@@ -7,6 +8,7 @@
 #include "graph/Graph.h"
 #include "models/Models.h"
 #include "structures/HashTable.h"
+#include "storage/Storage.h"
 
 namespace {
 constexpr double BASE_FARE = 20.0;
@@ -37,7 +39,7 @@ void printRoute(const std::vector<std::string>& route) {
     }
 }
 
-void registerRider(HashTable<Rider>& riders) {
+void registerRider(HashTable<Rider>& riders, std::vector<std::string>& riderIds) {
     Rider rider;
     rider.id = readLine("Rider ID: ");
     if (rider.id.empty() || riders.find(rider.id)) {
@@ -268,12 +270,18 @@ int main() {
     city.addRoad("Botanical Garden", "Sector 18", 15.0);
 
     HashTable<Rider> riders;
+    std::vector<std::string> riderIds;
     HashTable<Driver> drivers;
     std::vector<std::string> driverIds;
     std::queue<RideRequest> requests;
     std::vector<Ride> history;
     int nextRequestId = 1;
     int nextRideId = 1;
+    if (!storage::load(riders, riderIds, drivers, driverIds, requests, history,
+                       nextRequestId, nextRideId)) {
+        std::cerr << "Could not load saved data. Check smart_bike_taxi_data.txt.\\n";
+        return 1;
+    }
 
     std::cout << "====================================\n"
               << "      SMART BIKE TAXI PLATFORM\n"
@@ -295,7 +303,7 @@ int main() {
                   << "0. Exit\n";
         switch (readChoice()) {
             case 1: city.printLocations(); break;
-            case 2: registerRider(riders); break;
+            case 2: registerRider(riders, riderIds); break;
             case 3: registerDriver(drivers, driverIds, city); break;
             case 4: requestRide(riders, city, requests, nextRequestId); break;
             case 5: dispatchNext(riders, drivers, driverIds, city,
