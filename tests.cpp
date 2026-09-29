@@ -188,12 +188,24 @@ void testRideDispatchService() {
     check(result.ride.driverId == "NEAR", "nearest available driver selected");
     check(result.ride.distanceKm == 5.0, "trip distance recorded");
     check(result.ride.fare == 70.0, "fare calculated from trip distance");
-    check(result.ride.status == "Completed (simulated)", "simulation status recorded");
+    check(result.ride.status == "Assigned", "dispatch creates assigned ride");
     check(requests.empty() && history.size() == 1, "request consumed and ride recorded");
     check(nextRideId == 11, "ride ID increments after dispatch");
+    check(drivers.find("NEAR")->location == "A" &&
+              !drivers.find("NEAR")->available,
+          "assigned driver remains busy at pickup location");
+    check(!ride_service::completeRide(history, drivers, 10),
+          "cannot complete before ride starts");
+    check(ride_service::startRide(history, 10), "assigned ride starts");
+    check(!ride_service::startRide(history, 10), "ride cannot start twice");
+    check(ride_service::completeRide(history, drivers, 10),
+          "in-progress ride completes");
+    check(history.front().status == "Completed", "completed state recorded");
     check(drivers.find("NEAR")->location == "C" &&
               drivers.find("NEAR")->available,
-          "driver ends at destination and is available");
+          "completion moves and releases driver");
+    check(!ride_service::completeRide(history, drivers, 10),
+          "completed ride cannot complete twice");
     check(drivers.find("FAR")->location == "C", "unselected driver unchanged");
 
     HashTable<Driver> unavailableDrivers;
