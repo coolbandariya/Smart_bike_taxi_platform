@@ -173,6 +173,51 @@ void dispatchNext(const HashTable<Rider>& riders, HashTable<Driver>& drivers,
               << ride.distanceKm << " km | Fare: Rs. " << ride.fare << "\n";
 }
 
+void cancelRequest(std::queue<RideRequest>& requests) {
+    if (requests.empty()) {
+        std::cout << "No pending requests to cancel.\\n";
+        return;
+    }
+    const std::string raw = readLine("Request ID to cancel: ");
+    int id = -1;
+    try {
+        std::size_t used = 0;
+        id = std::stoi(raw, &used);
+        if (used != raw.size()) id = -1;
+    } catch (...) {
+        id = -1;
+    }
+    std::queue<RideRequest> retained;
+    bool removed = false;
+    while (!requests.empty()) {
+        RideRequest request = requests.front();
+        requests.pop();
+        if (request.requestId == id && !removed) {
+            removed = true;
+        } else {
+            retained.push(request);
+        }
+    }
+    requests.swap(retained);
+    std::cout << (removed ? "Request cancelled.\\n" : "Request ID not found.\\n");
+}
+
+void showDrivers(const HashTable<Driver>& drivers,
+                 const std::vector<std::string>& driverIds) {
+    if (driverIds.empty()) {
+        std::cout << "No drivers registered.\\n";
+        return;
+    }
+    for (const auto& id : driverIds) {
+        const Driver* driver = drivers.find(id);
+        if (driver) {
+            std::cout << id << " | " << driver->name << " | "
+                      << driver->location << " | "
+                      << (driver->available ? "Available" : "Busy") << '\\n';
+        }
+    }
+}
+
 void showHistory(const std::vector<Ride>& history) {
     if (history.empty()) {
         std::cout << "No completed rides yet.\n";
