@@ -59,10 +59,38 @@ inline bool save(const HashTable<Rider>& riders,
         out << '\n';
     }
     out.flush();
-    if (!out) return false;
+    if (!out) {
+        out.close();
+        std::remove(temp.c_str());
+        return false;
+    }
     out.close();
-    std::remove(fileName());
-    return std::rename(temp.c_str(), fileName()) == 0;
+    if (!out) {
+        std::remove(temp.c_str());
+        return false;
+    }
+
+    // Keep the previous snapshot until the new file is safely in place.
+    // The backup also lets us recover if the second rename fails.
+    const std::string backup = std::string(fileName()) + ".bak";
+    const bool hadPrevious = std::rename(fileName(), backup.c_str()) == 0;
+    if (!hadPrevious) {
+        // A missing destination is expected on the first save. If it exists
+        // but cannot be moved, do not risk replacing it.
+        std::ifstream existing(fileName());
+        if (existing.good()) {
+            std::remove(temp.c_str());
+            return false;
+        }
+    }
+
+    if (std::rename(temp.c_str(), fileName()) != 0) {
+        if (hadPrevious) std::rename(backup.c_str(), fileName());
+        std::remove(temp.c_str());
+        return false;
+    }
+    if (hadPrevious) std::remove(backup.c_str());
+    return true;
 }
 
 inline bool load(HashTable<Rider>& riders, std::vector<std::string>& riderIds,
