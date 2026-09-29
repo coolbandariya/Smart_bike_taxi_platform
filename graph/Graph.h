@@ -5,6 +5,7 @@
 #include <functional>
 #include <iostream>
 #include <limits>
+#include <cmath>
 #include <queue>
 #include <string>
 #include <unordered_map>
@@ -29,7 +30,8 @@ public:
     }
 
     bool addRoad(const std::string& from, const std::string& to, double km) {
-        if (km < 0 || !index_.count(from) || !index_.count(to)) return false;
+        if (!std::isfinite(km) || km < 0.0 || !index_.count(from) ||
+            !index_.count(to)) return false;
         const int u = index_.at(from), v = index_.at(to);
         adjacency_[u].push_back({v, km});
         adjacency_[v].push_back({u, km}); // Roads are two-way in this starter map.
