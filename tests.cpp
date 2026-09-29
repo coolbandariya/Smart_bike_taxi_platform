@@ -11,6 +11,10 @@
 #include "models/Models.h"
 #include "storage/Storage.h"
 #include "structures/HashTable.h"
+#include "storage/Storage.h"
+#include <cstdio>
+#include <queue>
+#include <vector>
 
 int main() {
     Graph graph;
@@ -71,6 +75,47 @@ int main() {
     assert(storage::save(savedRiders, riderIds, savedDrivers, driverIds,
                          pending, rides, 8, 5));
 
+    HashTable<Rider> loadedRiders;
+    HashTable<Driver> loadedDrivers;
+    std::vector<std::string> loadedRiderIds, loadedDriverIds;
+    std::queue<RideRequest> loadedPending;
+    std::vector<Ride> loadedRides;
+    int nextRequest = 1, nextRide = 1;
+    assert(storage::load(loadedRiders, loadedRiderIds, loadedDrivers,
+                         loadedDriverIds, loadedPending, loadedRides,
+                         nextRequest, nextRide));
+    assert(loadedRiders.find("R1") &&
+           loadedRiders.find("R1")->name == "Updated Rider");
+    assert(loadedDrivers.find("D1") &&
+           loadedDrivers.find("D1")->location == "A");
+    assert(loadedPending.size() == 1 && loadedPending.front().requestId == 7);
+    assert(loadedRides.size() == 1 && loadedRides.front().route.size() == 3);
+    assert(nextRequest == 8 && nextRide == 5);
+    std::remove(storage::fileName());
+
+
+    HashTable<Rider> savedRiders;
+    HashTable<Driver> savedDrivers;
+    std::vector<std::string> riderIds{"R1"}, driverIds{"D1"};
+    assert(savedRiders.insert("R1", updated));
+    Driver driver{"D1", "Test Driver", "2222222222", "A", true};
+    assert(savedDrivers.insert("D1", driver));
+    std::queue<RideRequest> pending;
+    pending.push(RideRequest{7, "R1", "A", "C"});
+    std::vector<Ride> rides;
+    Ride savedRide;
+    savedRide.rideId = 4;
+    savedRide.riderId = "R1";
+    savedRide.driverId = "D1";
+    savedRide.pickup = "A";
+    savedRide.destination = "C";
+    savedRide.distanceKm = 7.0;
+    savedRide.fare = 90.0;
+    savedRide.route = {"A", "B", "C"};
+    savedRide.status = "Completed (simulated)";
+    rides.push_back(savedRide);
+    assert(storage::save(savedRiders, riderIds, savedDrivers, driverIds,
+                         pending, rides, 8, 5));
     HashTable<Rider> loadedRiders;
     HashTable<Driver> loadedDrivers;
     std::vector<std::string> loadedRiderIds, loadedDriverIds;
