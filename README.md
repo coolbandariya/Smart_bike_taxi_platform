@@ -2,189 +2,180 @@
 
 # 🏍️ Smart Bike Taxi Platform
 
-### A C++17 data-structures-and-algorithms project
+**A modular C++17 ride-booking simulation built around data structures and algorithms.**
 
-A console-based ride-booking simulation featuring shortest-path routing, FIFO requests, nearest-driver matching, and fare estimation.
+Shortest-path routing · FIFO ride requests · Nearest-driver dispatch · Local persistence
 
-![C++17](https://img.shields.io/badge/C%2B%2B-17-blue?logo=cplusplus)
-![Build](https://img.shields.io/badge/build-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
+![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white)
+![CI](https://github.com/coolbandariya/Smart_bike_taxi_platform/actions/workflows/cpp.yml/badge.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
-![Project](https://img.shields.io/badge/type-academic%20simulation-orange)
+![Project](https://img.shields.io/badge/status-academic%20simulation-orange)
 
 </div>
 
 ---
 
-## 🚦 How it works
+## Overview
 
-The application models a small, illustrative Noida road network. A rider is registered, submits a request, and the system finds a route and matches the request with an available driver.
+Smart Bike Taxi Platform is an interactive terminal application that demonstrates how core DSA concepts can support a simplified ride-hailing workflow. It uses a small, illustrative Noida road network and lets users register riders and drivers, request and cancel rides, dispatch requests, estimate fares, and review ride history.
+
+> This is an academic simulation. It does not connect to real riders, drivers, maps, traffic, or payment services.
+
+## Workflow
 
 ```mermaid
 flowchart TD
-    A[Start application] --> B[Register rider and driver]
-    B --> C[Request ride]
-    C --> D{Locations connected?}
-    D -- No --> E[Show invalid route]
-    E --> C
-    D -- Yes --> F[Add request to FIFO queue]
+    A[Launch] --> B[Load saved state]
+    B --> C[Register rider / driver]
+    C --> D[Create ride request]
+    D --> E[Validate rider and route]
+    E --> F[Append request to FIFO queue]
     F --> G[Dispatch next request]
-    G --> H{Available driver?}
-    H -- No --> I[Keep request queued]
+    G --> H{Eligible driver available?}
+    H -- No --> I[Keep request pending]
     I --> G
-    H -- Yes --> J[Min-heap selects nearest driver]
-    J --> K[Dijkstra calculates trip route]
+    H -- Yes --> J[Choose shortest route to pickup]
+    J --> K[Calculate trip route with Dijkstra]
     K --> L[Estimate fare and record ride]
-    L --> M[Simulate completion and update driver location]
-    M --> N[Ride history]
+    L --> M[Simulate trip completion]
+    M --> N[Save state]
+    N --> O[Ride history / next action]
+    O --> N
 ```
 
-## ✨ Features
+## Features
 
-| Feature | What it does |
+| Feature | Description |
 | --- | --- |
-| 🗺️ Road network | Weighted, undirected graph representing sample Noida locations |
-| 📍 Route planning | Dijkstra's algorithm returns the shortest path and distance |
-| 🙋 Rider registration | Stores rider records in a custom hash table |
-| 🛵 Driver registration | Stores drivers, starting locations, and availability |
-| 🧾 Ride requests | FIFO queue preserves request arrival order |
-| ⚡ Driver matching | Min-priority queue selects an available driver with the shortest route to pickup |
-| 💰 Fare estimate | Sample formula: ₹20 base fare + ₹10 per km |
-| 🧹 Cancellation | Cancels a pending request by its request ID |
-| 📋 Ride history | Lists rides completed in the current run |
-| 👥 Driver listing | Shows each registered driver's location and availability |
+| Road network | Weighted, undirected graph with sample Noida locations |
+| Route planning | Dijkstra shortest path with route reconstruction |
+| Rider and driver records | Custom linear-probing hash table |
+| Request management | FIFO queue, pending count, and cancellation by request ID |
+| Driver matching | Min-priority queue selects the available driver with the shortest route to pickup |
+| Driver controls | List drivers and toggle availability |
+| Fare estimate | Sample formula: ₹20 base + ₹10 per km |
+| Ride history | Records simulated completed rides |
+| Persistence | Saves riders, drivers, pending requests, history, and ID counters to a local file |
+| Automated checks | GitHub Actions compiles the app and tests with warnings treated as errors |
 
-## 🧠 DSA concepts demonstrated
+## DSA concepts
 
-```mermaid
-flowchart LR
-    A[City map] --> B[Adjacency list]
-    C[Route finding] --> D[Dijkstra + min-priority queue]
-    E[Record lookup] --> F[Linear-probing hash table]
-    G[Request ordering] --> H[FIFO queue]
-    I[Driver selection] --> J[Min-heap]
-```
-
-| Problem | Structure / algorithm | Typical complexity |
+| Use case | Implementation | Complexity |
 | --- | --- | --- |
-| Store roads | Adjacency list | Space: O(V + E) |
-| Find shortest route | Dijkstra with binary heap | O((V + E) log V) |
-| Find rider/driver by ID | Linear-probing hash table | Average O(1), worst O(n) |
-| Preserve request order | FIFO queue | Enqueue/dequeue O(1) |
-| Select nearest available driver | Min-heap | Insert/remove O(log D) |
+| Road network | Adjacency list | O(V + E) space |
+| Shortest path | Dijkstra with binary heap | O((V + E) log V) |
+| Record lookup | Linear-probing hash table | Average O(1), worst O(n) |
+| Request order | FIFO queue | O(1) enqueue/dequeue |
+| Driver candidate selection | Min-heap | O(log D) per insertion/removal |
 
-Here, **V** is the number of locations, **E** is the number of roads, and **D** is the number of candidate drivers.
+V = locations, E = roads, D = eligible drivers. Hash table performance depends on load factor and collisions.
 
-## 🧰 Tech stack
-
-- **Language:** C++17
-- **Core concepts:** Graphs, Dijkstra's algorithm, hash tables, queues, heaps
-- **Build:** g++
-- **Automated checks:** GitHub Actions
-
-## ▶️ Build and run
-
-You need a C++17-compatible compiler such as g++.
-
-### Windows (MinGW / PowerShell)
-
-Run these commands from the repository folder:
-
-```powershell
-g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o smart_bike_taxi.exe
-.\smart_bike_taxi.exe
-```
-
-### Linux / macOS
-
-```bash
-g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o smart_bike_taxi
-./smart_bike_taxi
-```
-
-Choose an option from the menu. Enter location names exactly as displayed by **Show locations**.
-
-## 🧪 Run tests
-
-The test program checks graph creation, shortest-path distance and path reconstruction, invalid routes/roads, and hash-table insert, lookup, and update behavior.
-
-### Windows
-
-```powershell
-g++ -std=c++17 -Wall -Wextra -pedantic tests.cpp -o tests.exe
-.\tests.exe
-```
-
-### Linux / macOS
-
-```bash
-g++ -std=c++17 -Wall -Wextra -pedantic tests.cpp -o tests
-./tests
-```
-
-A GitHub Actions workflow is configured to compile the application and tests with warnings treated as errors, then run the tests on pushes and pull requests to `main`.
-
-## 🗂️ Project structure
+## Project structure
 
 ```text
 .
-├── .github/
-│   └── workflows/
-│       └── cpp.yml          # Build and test workflow
-├── graph/
-│   └── Graph.h              # Adjacency-list graph and Dijkstra
-├── models/
-│   └── Models.h             # Rider, driver, request, and ride models
-├── structures/
-│   └── HashTable.h          # Custom linear-probing hash table
-├── main.cpp                 # Interactive console application
-├── tests.cpp                # Graph and hash-table assertions
+├── .github/workflows/cpp.yml  # CI build and test
+├── graph/Graph.h              # Graph and Dijkstra
+├── models/Models.h            # Rider, driver, request, ride models
+├── storage/Storage.h          # Versioned local save/load
+├── structures/HashTable.h     # Linear-probing hash table
+├── main.cpp                   # Interactive application
+├── tests.cpp                  # Unit and persistence tests
 └── README.md
 ```
 
-## 🗺️ Sample map
+## Requirements
 
-The built-in demonstration network contains these locations:
+- C++17-compatible compiler (g++ recommended)
+- Terminal / PowerShell
 
-- JIIT 128
-- Sector 62
-- Botanical Garden
-- Noida City Centre
-- Sector 18
+## Build and run
 
-Road distances are illustrative values defined in `main.cpp`; they are not live or official road measurements.
+Run from the repository root.
 
-## ⚠️ Scope and limitations
+**Windows (MinGW / PowerShell)**
 
-This repository is an **academic simulation**, not a production ride-hailing service.
+```powershell
+g++ -std=c++17 -Wall -Wextra -Wpedantic main.cpp -o smart_bike_taxi.exe
+.\smart_bike_taxi.exe
+```
 
-- All rider, driver, request, and ride data is held in memory and is lost when the program exits.
-- The map and distances are sample data; there is no live map or traffic integration.
-- Phone numbers are demo inputs only. There is no OTP or identity verification.
-- Dispatch and ride completion are simulated immediately; there is no live driver tracking.
-- There is no payment processing, backend, or persistent database.
+**Linux / macOS**
 
-## 🔭 Possible next steps
+```bash
+g++ -std=c++17 -Wall -Wextra -Wpedantic main.cpp -o smart_bike_taxi
+./smart_bike_taxi
+```
 
-- Persist riders, drivers, and ride history between sessions.
-- Add driver availability controls and more dispatch scenarios.
-- Expand automated tests to cover queue cancellation and dispatch behavior.
-- Replace the sample map with a configurable dataset.
+### Menu
 
-## 👨‍💻 Repository
+| Option | Action |
+| ---: | --- |
+| 1 | Show locations |
+| 2 | Register rider |
+| 3 | Register driver |
+| 4 | Request a ride |
+| 5 | Dispatch next request |
+| 6 | Show ride history |
+| 7 | Show pending request count |
+| 8 | Cancel a pending request |
+| 9 | Show drivers |
+| 10 | Toggle driver availability |
+| 0 | Exit |
 
-**GitHub:** [coolbandariya/Smart_bike_taxi_platform](https://github.com/coolbandariya/Smart_bike_taxi_platform)
+Enter location names exactly as listed by **Show locations**.
+
+## Run tests
+
+**Windows**
+
+```powershell
+g++ -std=c++17 -Wall -Wextra -Wpedantic tests.cpp -o tests.exe
+.\tests.exe
+```
+
+**Linux / macOS**
+
+```bash
+g++ -std=c++17 -Wall -Wextra -Wpedantic tests.cpp -o tests
+./tests
+```
+
+Tests cover graph and hash-table behavior, invalid road weights, and a persistence save/load round trip. GitHub Actions runs strict compilation and the test executable on pushes and pull requests targeting `main`.
+
+## Local data
+
+The application writes `smart_bike_taxi_data.txt` in the current working directory and saves after each menu action. Keep this file in the same directory when restarting the application to restore the demo state.
+
+- The file is local, plain-text demo storage—not encrypted or suitable for sensitive personal information.
+- Do not enter real phone numbers or other private information.
+- The file is excluded from Git by `.gitignore`.
+- The save format is versioned; incompatible or malformed data causes startup to stop with an error rather than silently overwrite it.
+
+## Sample map and fare
+
+The built-in map includes JIIT 128, Sector 62, Botanical Garden, Noida City Centre, and Sector 18. Distances are illustrative values defined in the source, not official road distances.
+
+Fare estimate = ₹20 + (shortest trip distance in km × ₹10). This is a demonstration formula, not a real-world fare quote.
+
+## Limitations
+
+- Dispatch and trip completion are synchronous simulations.
+- No live GPS, map provider, traffic data, OTP, authentication, database server, payment gateway, or buyer/operator network is connected.
+- The local data file is intended for a single-user demo and has no concurrent-write protection.
+- The custom hash table has a fixed capacity of 101 records per table; when full, new records are rejected.
+- No guarantee is made for recovery from power loss during a write.
+
+## Further development
+
+Possible extensions include a configurable map, larger/resizing hash table, stronger persistence strategy, additional dispatch/cancellation integration tests, and a real backend. Production use would also require authentication, privacy controls, secure storage, operational monitoring, and real service integrations.
 
 ---
 
 <div align="center">
+
 Built as a C++17 DSA academic project.
+
+**[View repository](https://github.com/coolbandariya/Smart_bike_taxi_platform)**
+
 </div>
-
-
-## Recent improvements
-
-- Added a console menu option to manually toggle a driver's availability.
-- Hardened road creation to reject infinite and NaN distances.
-- Expanded tests for invalid road weights, zero-distance roads, empty hash keys, and full hash tables.
-
-Persistence is still a future improvement; all records currently exist only for the current program session.
