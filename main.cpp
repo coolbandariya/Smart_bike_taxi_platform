@@ -280,7 +280,7 @@ int main() {
     int nextRideId = 1;
     if (!storage::load(riders, riderIds, drivers, driverIds, requests, history,
                        nextRequestId, nextRideId)) {
-        std::cerr << "Could not load saved data. Check smart_bike_taxi_data.txt.\\n";
+        std::cerr << "Could not load saved data. Check smart_bike_taxi_data.txt.\n";
         return 1;
     }
 
@@ -316,6 +316,10 @@ int main() {
             case 10: toggleDriverAvailability(drivers, driverIds); break;
             case 0: running = false; break;
             default: std::cout << "Invalid choice. Enter a number from the menu.\n";
+        }
+        if (!storage::save(riders, riderIds, drivers, driverIds, requests, history,
+                           nextRequestId, nextRideId)) {
+            std::cerr << "Warning: could not save data.\n";
         }
     }
     std::cout << "Thank you for using the Smart Bike Taxi Platform.\n";
