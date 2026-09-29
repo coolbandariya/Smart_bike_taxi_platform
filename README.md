@@ -174,7 +174,7 @@ Fare estimate = ₹20 + (shortest trip distance in km × ₹10). This is a demon
 - No live GPS, map provider, traffic data, OTP, authentication, database server, payment gateway, or buyer/operator network is connected.
 - The local data file is intended for a single-user demo and has no concurrent-write protection.
 - The custom hash table has a fixed capacity of 101 records per table; when full, new records are rejected.
-- No guarantee is made for recovery from power loss during a write.
+- Saves write a temporary snapshot and retain the previous snapshot as a backup during replacement; sudden power loss and filesystem-specific rename behavior can still affect recovery.
 
 ## Further development
 
