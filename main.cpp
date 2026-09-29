@@ -218,6 +218,23 @@ void showDrivers(const HashTable<Driver>& drivers,
     }
 }
 
+void toggleDriverAvailability(HashTable<Driver>& drivers,
+                                const std::vector<std::string>& driverIds) {
+    if (driverIds.empty()) {
+        std::cout << "No drivers registered.\\n";
+        return;
+    }
+    const std::string id = readLine("Driver ID: ");
+    Driver* driver = drivers.find(id);
+    if (!driver) {
+        std::cout << "Driver not found.\\n";
+        return;
+    }
+    driver->available = !driver->available;
+    std::cout << "Driver is now "
+              << (driver->available ? "Available" : "Unavailable") << ".\\n";
+}
+
 void showHistory(const std::vector<Ride>& history) {
     if (history.empty()) {
         std::cout << "No completed rides yet.\n";
@@ -286,6 +303,7 @@ int main() {
             case 7: std::cout << "Pending requests: " << requests.size() << "\n"; break;
             case 8: cancelRequest(requests); break;
             case 9: showDrivers(drivers, driverIds); break;
+            case 10: toggleDriverAvailability(drivers, driverIds); break;
             case 0: running = false; break;
             default: std::cout << "Invalid choice. Enter a number from the menu.\n";
         }
