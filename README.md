@@ -52,7 +52,7 @@ flowchart TD
 | Rider and driver records | Custom linear-probing hash table |
 | Request management | FIFO queue, pending count, and cancellation by request ID |
 | Driver matching | Min-priority queue selects the available driver with the shortest route to pickup |
-| Driver controls | List drivers and toggle availability |
+| Driver controls | List drivers and toggle availability |\n| Ride lifecycle | Assigned → in progress → completed; driver is released only on completion |
 | Fare estimate | Sample formula: ₹20 base + ₹10 per km |
 | Ride history | Records simulated completed rides |
 | Persistence | Saves riders, drivers, pending requests, history, and ID counters to a local file |
@@ -170,7 +170,7 @@ Fare estimate = ₹20 + (shortest trip distance in km × ₹10). This is a demon
 
 ## Limitations
 
-- Dispatch and trip completion are synchronous simulations.
+- Dispatch, ride start, and trip completion are synchronous simulations; the operator manually advances ride states.
 - No live GPS, map provider, traffic data, OTP, authentication, database server, payment gateway, or buyer/operator network is connected.
 - The local data file is intended for a single-user demo and has no concurrent-write protection.
 - The custom hash table has a fixed capacity of 101 records per table; when full, new records are rejected.
@@ -178,7 +178,7 @@ Fare estimate = ₹20 + (shortest trip distance in km × ₹10). This is a demon
 
 ## Further development
 
-Possible extensions include a configurable map, a larger/resizing hash table, dispatch/cancellation integration tests, a ride lifecycle with explicit requested/assigned/in-progress/completed/cancelled states, and a real backend. Production use would also require authentication, privacy controls, secure storage, operational monitoring, and real service integrations.
+Possible extensions include a configurable map, a larger/resizing hash table, dispatch/cancellation integration tests, cancellation of already-assigned rides and a real backend. Production use would also require authentication, privacy controls, secure storage, operational monitoring, and real service integrations.
 
 ---
 
