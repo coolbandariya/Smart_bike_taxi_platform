@@ -105,7 +105,7 @@ void requestRide(const HashTable<Rider>& riders, const Graph& city,
               << " added to the FIFO queue.\n";
     std::cout << "Estimated distance: " << std::fixed << std::setprecision(2)
               << route.distance << " km; estimated fare: Rs. "
-              << BASE_FARE + route.distance * FARE_PER_KM << "\n";
+              << ride_service::BASE_FARE + route.distance * ride_service::FARE_PER_KM << "\n";
 }
 
 void dispatchNext(const HashTable<Rider>& riders, HashTable<Driver>& drivers,
@@ -272,6 +272,7 @@ int main() {
             case 0: running = false; break;
             default: std::cout << "Invalid choice. Enter a number from the menu.\n";
         }
+        if (std::cin.eof()) running = false;
         if (!storage::save(riders, riderIds, drivers, driverIds, requests, history,
                            nextRequestId, nextRideId)) {
             std::cerr << "Warning: could not save data.\n";
