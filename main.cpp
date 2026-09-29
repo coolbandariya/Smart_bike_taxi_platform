@@ -291,6 +291,7 @@ int main() {
                   << "7. Show pending request count\n"
                   << "8. Cancel a pending request\n"
                   << "9. Show drivers\n"
+                  << "10. Toggle driver availability\n"
                   << "0. Exit\n";
         switch (readChoice()) {
             case 1: city.printLocations(); break;
