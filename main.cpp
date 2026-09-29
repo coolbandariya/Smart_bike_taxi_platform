@@ -181,13 +181,13 @@ void toggleDriverAvailability(HashTable<Driver>& drivers,
                                 const std::vector<std::string>& driverIds,
                                 const std::vector<Ride>& history) {
     if (driverIds.empty()) {
-        std::cout << "No drivers registered.\\n";
+        std::cout << "No drivers registered.\n";
         return;
     }
     const std::string id = readLine("Driver ID: ");
     Driver* driver = drivers.find(id);
     if (!driver) {
-        std::cout << "Driver not found.\\n";
+        std::cout << "Driver not found.\n";
         return;
     }
     if (!driver->available) {
@@ -195,14 +195,14 @@ void toggleDriverAvailability(HashTable<Driver>& drivers,
             if (ride.driverId == driver->id &&
                 (ride.status == ride_service::statusName(ride_service::RideStatus::Assigned) ||
                  ride.status == ride_service::statusName(ride_service::RideStatus::InProgress))) {
-                std::cout << "Driver has an active ride and cannot be made available manually.\\n";
+                std::cout << "Driver has an active ride and cannot be made available manually.\n";
                 return;
             }
         }
     }
     driver->available = !driver->available;
     std::cout << "Driver is now "
-              << (driver->available ? "Available" : "Unavailable") << ".\\n";
+              << (driver->available ? "Available" : "Unavailable") << ".\n";
 }
 
 int readRideId(const std::string& prompt) {
@@ -217,14 +217,14 @@ int readRideId(const std::string& prompt) {
 void startRide(std::vector<Ride>& history) {
     const int id = readRideId("Assigned ride ID to start: ");
     std::cout << (ride_service::startRide(history, id)
-        ? "Ride is now in progress.\\n" : "Ride not found or not in assigned state.\\n");
+        ? "Ride is now in progress.\n" : "Ride not found or not in assigned state.\n");
 }
 
 void completeRide(std::vector<Ride>& history, HashTable<Driver>& drivers) {
     const int id = readRideId("In-progress ride ID to complete: ");
     std::cout << (ride_service::completeRide(history, drivers, id)
-        ? "Ride completed; driver is available at the destination.\\n"
-        : "Ride not found, not in progress, or driver state is invalid.\\n");
+        ? "Ride completed; driver is available at the destination.\n"
+        : "Ride not found, not in progress, or driver state is invalid.\n");
 }
 
 void showHistory(const std::vector<Ride>& history) {
