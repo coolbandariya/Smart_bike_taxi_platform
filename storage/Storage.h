@@ -100,34 +100,50 @@ inline bool load(HashTable<Rider>& riders, std::vector<std::string>& riderIds,
                  int& nextRequestId, int& nextRideId) {
     std::ifstream in(fileName());
     if (!in) return true; // First run.
+
+    // Parse into temporary state. A malformed file must not partially mutate
+    // the live application state.
+    HashTable<Rider> parsedRiders;
+    HashTable<Driver> parsedDrivers;
+    std::vector<std::string> parsedRiderIds, parsedDriverIds;
+    std::queue<RideRequest> parsedPending;
+    std::vector<Ride> parsedHistory;
+    int parsedNextRequestId = 1, parsedNextRideId = 1;
+
     std::string magic;
     if (!std::getline(in, magic) || magic != "SMART_BIKE_TAXI_V1") return false;
     std::size_t nr = 0, nd = 0, np = 0, nh = 0;
-    if (!(in >> nr >> nd >> np >> nh >> nextRequestId >> nextRideId) ||
+    if (!(in >> nr >> nd >> np >> nh >> parsedNextRequestId >> parsedNextRideId) ||
         nr > 100 || nd > 100 || np > 10000 || nh > 100000 ||
-        nextRequestId < 1 || nextRideId < 1) return false;
+        parsedNextRequestId < 1 || parsedNextRideId < 1) return false;
+
+    int maxRequestId = 0, maxRideId = 0;
     for (std::size_t i = 0; i < nr; ++i) {
         Rider r;
         if (!(in >> std::quoted(r.id) >> std::quoted(r.name) >> std::quoted(r.phone)) ||
-            r.id.empty() || r.name.empty() || r.phone.empty() || riders.find(r.id) ||
-            !riders.insert(r.id, r)) return false;
-        riderIds.push_back(r.id);
+            r.id.empty() || r.name.empty() || r.phone.empty() ||
+            parsedRiders.find(r.id) || !parsedRiders.insert(r.id, r)) return false;
+        parsedRiderIds.push_back(r.id);
     }
     for (std::size_t i = 0; i < nd; ++i) {
         Driver d;
+        int available = 0;
         if (!(in >> std::quoted(d.id) >> std::quoted(d.name) >> std::quoted(d.phone)
-                 >> std::quoted(d.location) >> d.available) ||
+                 >> std::quoted(d.location) >> available) ||
             d.id.empty() || d.name.empty() || d.phone.empty() || d.location.empty() ||
-            drivers.find(d.id) || !drivers.insert(d.id, d)) return false;
-        driverIds.push_back(d.id);
+            (available != 0 && available != 1) || parsedDrivers.find(d.id)) return false;
+        d.available = available == 1;
+        if (!parsedDrivers.insert(d.id, d)) return false;
+        parsedDriverIds.push_back(d.id);
     }
     for (std::size_t i = 0; i < np; ++i) {
         RideRequest r;
         if (!(in >> r.requestId >> std::quoted(r.riderId) >> std::quoted(r.pickup)
                  >> std::quoted(r.destination)) || r.requestId < 1 ||
             r.riderId.empty() || r.pickup.empty() || r.destination.empty() ||
-            r.pickup == r.destination || !riders.find(r.riderId)) return false;
-        pending.push(r);
+            r.pickup == r.destination || !parsedRiders.find(r.riderId)) return false;
+        parsedPending.push(r);
+        if (r.requestId > maxRequestId) maxRequestId = r.requestId;
     }
     for (std::size_t i = 0; i < nh; ++i) {
         Ride r;
@@ -140,7 +156,7 @@ inline bool load(HashTable<Rider>& riders, std::vector<std::string>& riderIds,
             r.destination.empty() || r.pickup == r.destination ||
             !std::isfinite(r.distanceKm) || r.distanceKm <= 0.0 ||
             !std::isfinite(r.fare) || r.fare < 0.0 || r.status.empty() ||
-            !riders.find(r.riderId) || !drivers.find(r.driverId)) return false;
+            !parsedRiders.find(r.riderId) || !parsedDrivers.find(r.driverId)) return false;
         for (std::size_t j = 0; j < routeSize; ++j) {
             std::string stop;
             if (!(in >> std::quoted(stop)) || stop.empty()) return false;
@@ -148,10 +164,22 @@ inline bool load(HashTable<Rider>& riders, std::vector<std::string>& riderIds,
         }
         if (r.route.front() != r.pickup || r.route.back() != r.destination)
             return false;
-        history.push_back(r);
+        parsedHistory.push_back(r);
+        if (r.rideId > maxRideId) maxRideId = r.rideId;
     }
     in >> std::ws;
-    return in.eof();
+    if (!in.eof() || parsedNextRequestId <= maxRequestId ||
+        parsedNextRideId <= maxRideId) return false;
+
+    riders = parsedRiders;
+    riderIds = std::move(parsedRiderIds);
+    drivers = parsedDrivers;
+    driverIds = std::move(parsedDriverIds);
+    pending = std::move(parsedPending);
+    history = std::move(parsedHistory);
+    nextRequestId = parsedNextRequestId;
+    nextRideId = parsedNextRideId;
+    return true;
 }
 } // namespace storage
 #endif
