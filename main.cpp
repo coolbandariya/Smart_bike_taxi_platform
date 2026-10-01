@@ -229,7 +229,7 @@ void completeRide(std::vector<Ride>& history, HashTable<Driver>& drivers) {
 
 void showHistory(const std::vector<Ride>& history) {
     if (history.empty()) {
-        std::cout << "No completed rides yet.\n";
+        std::cout << "No rides recorded yet.\n";
         return;
     }
     for (const Ride& ride : history) {
