@@ -54,7 +54,7 @@ flowchart TD
 | Driver matching | Min-priority queue selects the available driver with the shortest route to pickup |
 | Driver controls | List drivers and toggle availability |\n| Ride lifecycle | Assigned → in progress → completed; driver is released only on completion |
 | Fare estimate | Sample formula: ₹20 base + ₹10 per km |
-| Ride history | Records simulated completed rides |
+| Ride history | Lists all recorded rides and their current status |
 | Persistence | Saves riders, drivers, pending requests, history, and ID counters to a local file |
 | Automated checks | GitHub Actions compiles the app and tests with warnings treated as errors |
 
